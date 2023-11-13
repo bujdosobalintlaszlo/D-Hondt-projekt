@@ -7,4 +7,6 @@
   - Szamol
   - Szimulal
   - Megjelenit
+  - General
+
 -Tesztek:
