@@ -1,0 +1,79 @@
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+using System.IO;
+
+namespace D_Hondt_beadando
+{
+    class Szamol : Partok
+    {
+        public int[,] matrix;
+
+        public Szamol(int partszam, int mandatum, List<int> szavazatszam, List<string> partnev) : base(partnev, szavazatszam)
+        {
+            this.matrix = new int[mandatum, partszam];
+        }
+        public void matrixFel()
+        {
+            for(int i = 0; i < matrix.GetLength(0); i++)
+            {
+                for(int j = 0; j < matrix.GetLength(1); j++)
+                {
+                    double ertek = szavazatszam[j] / i + 1;
+                    if()
+                }
+            }
+        }
+
+    }
+    class Szimulal
+    {
+
+    }
+    class Megjelenit
+    {
+
+    }
+    class General
+    {
+
+    }
+    public class Partok
+    {
+        public static int partszam;
+        public static int mandatum;
+        public List<string> partnev;
+        public List<int> szavazatszam;
+        public Partok(string sor)
+        {
+            partnev = new List<string>();
+            szavazatszam = new List<int>();
+            List<string> sorSplit = sor.Split(' ').ToList();
+            partnev.Add(sorSplit[0]);
+            szavazatszam.Add(int.Parse(sorSplit[1]));
+            partszam++;
+        }
+
+        public Partok(List<string> partnev, List<int> szavazatszam)
+        {
+            this.partnev = partnev;
+            this.szavazatszam = szavazatszam;
+
+        }
+    }
+    class Program
+    {
+
+
+        static void Main(string[] args)
+        {
+            
+            Partok.mandatum = Convert.ToInt32(File.ReadAllLines("input.txt").Take(1).First());
+            List<Partok> adatok = Array.ConvertAll(File.ReadAllLines("input.txt").Skip(1).ToArray(), (sor) => new Partok(sor)).ToList();
+            Console.WriteLine(Partok.mandatum);
+            Console.ReadKey();
+        }
+    }
+}
