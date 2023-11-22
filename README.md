@@ -10,3 +10,4 @@
   - General
 
 -Tesztek:
+Take 10 helyett mandatum !!!!! 28.sor
