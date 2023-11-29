@@ -16,9 +16,10 @@ namespace Dhondt
         }
         public void Kiir()
         {
+            Console.WriteLine($"Partok száma: {Partok.Partszam}");
+            Console.WriteLine($"Mandatumszam:{ Partok.Mandatum}");
             foreach (Partok partok in adatok)
             {
-                Console.WriteLine($"Partok száma: {partok.Parts.Count}");
 
                 foreach (Part part in partok.Parts)
                 {
