@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -18,17 +19,16 @@ namespace Dhondt
         public Partok()
         {
             Parts = new List<Part>();
+            
         }
 
         /// <summary>
         /// Sor alapján inicializálja a Partok objektumot.
         /// </summary>
         /// <param name="sor">A sor, amelyből inicializáljuk a Partok objektumot.</param>
-        public Partok(string sor)
+        public Partok(string fajlNev)
         {
-            Parts = new List<Part>();
-            List<string> sorSplit = sor.Split(' ').ToList();
-            Parts.Add(new Part(sorSplit[0], int.Parse(sorSplit[1]), int.Parse(sorSplit[2]), int.Parse(sorSplit[3])));
+            Parts=File.ReadAllLines(fajlNev).Skip(1).Select(sor => new Part(sor)).ToList();
             Partszam++;
         }
     }
