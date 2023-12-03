@@ -1,0 +1,27 @@
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace Dhondt
+{
+    public class Szimulacio
+    {
+        public Szimulacio()
+        {
+
+        }
+        public void Lefuttat()
+        {
+            Szamol sz = new Szamol();
+            MatrixMegjelenit(sz.MatrixKi());
+            
+        }
+        public void MatrixMegjelenit(List<int> l)
+        {
+            
+        }
+
+    }
+}
