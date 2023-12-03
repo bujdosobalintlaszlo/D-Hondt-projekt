@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Security.Cryptography;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -8,31 +9,81 @@ namespace Dhondt
 {
     public class Szamol
     {
-        private List<Partok> adatok;
-
-        public Szamol(List<Partok> adatok)
+        private Partok p;
+        public Szamol()
         {
-            this.adatok = adatok;
+            p = new Partok("input.txt");
         }
-        public void Kiir()
+        //-----------------------------------------------------------------------------------------------
+        /// <summary>
+        /// Megcsinalja a Dhondt matrixot
+        /// </summary>
+        /// <returns>A Dhondt martix egy lista formajaban</returns>
+        public List<int> MatrixKi()
         {
-            Console.WriteLine($"Partok száma: {Partok.Partszam}");
-            Console.WriteLine($"Mandatumszam:{ Partok.Mandatum}");
-            foreach (Partok partok in adatok)
+            List<int> MatrixSzamok = new List<int>();
+
+            for (int i = 0; i < Partok.Partszam; i++)
             {
-
-                foreach (Part part in partok.Parts)
+                for (int j = 0; j < Partok.Mandatum; j++)
                 {
-                    Console.WriteLine($"Neve: {part.PartNev}, Nemzetiseg: {part.Nemzete}, Szavszam.:{part.SzavazatSzam}, Szazalek:{part.Szazalek}");
+                    int szam = (int)Math.Round((double)p.Parts[i].SzavazatSzam / (j + 1), 0);
+                    MatrixSzamok.Add(szam);
                 }
-
-                Console.WriteLine();
             }
+            return MatrixSzamok;
         }
+        //-----------------------------------------------------------------------------------------------
+        //-----------------------------------------------------------------------------------------------
+        /// <summary>
+        /// Megnezi, hogy bejut-e a bizonyospart. Ha igen akkor bekerul a listaba.
+        /// </summary>
+        /// <returns>Visszaadja a partok nevet amelyek bejutnak</returns>
+        public List<string> KuszobSzamit()
+        {
+            List<string> l = new List<string>();
+            double sum = p.Parts.Sum(part => part.SzavazatSzam);
+            for (int i = 0; i < Partok.Partszam; i++)
+            {
+                if (Math.Round(p.Parts[i].SzavazatSzam / sum * 100) > p.Parts[i].Szazalek)
+                {
+                    l.Add(p.Parts[i].PartNev);
+                }
+            }
+            return l;
+        }
+        //-----------------------------------------------------------------------------------------------
+        //-----------------------------------------------------------------------------------------------
+        /// <summary>
+        /// Meghatarozza a Kedvezmenyezett partokat
+        /// </summary>
+        /// <returns>Visszaadja a kedvezmenyezett partok nevet</returns>
+        public List<string> Kedvezmenyesek() => p.Parts.Where(part => part.Szazalek == 1).Select(part => part.PartNev).ToList();
+        //-----------------------------------------------------------------------------------------------
+        //-----------------------------------------------------------------------------------------------
+        /// <summary>
+        /// Kivalasztja a Mandatumszamnyi partot (ez meg nem veszi figyelembe a kedvezmenyt)
+        /// </summary>
+        /// <returns>A Mandatumszamnyi erteket</returns>
+        public List<int> MandatumKioszt(List<int> l) => l.OrderBy(x => x).Take(Partok.Mandatum).ToList();
+        //-----------------------------------------------------------------------------------------------
+        //-----------------------------------------------------------------------------------------------
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <returns></returns>
+        public List<Tuple<int, string>> Kioszt()
+        {
+            List<Tuple<int,string>> ret = new List<Tuple<int, string>>();
+            List<int> matrixLista = MatrixKi();
+            List<string> kedvezmenyezettPartok = Kedvezmenyesek();
+            List<string> bejutottak = KuszobSzamit();
+            List<int> mandatumok = MandatumKioszt(matrixLista);
 
-        public void Lefuttat()
-        { 
-        
+
+
+            return ret;
         }
+        //-----------------------------------------------------------------------------------------------
     }
 }
