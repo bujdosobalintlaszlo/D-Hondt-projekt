@@ -15,6 +15,7 @@ namespace Dhondt
         public int Nemzete { get; set; }
         public int SzavazatSzam { get; set; }
         public int Szazalek { get; set; }
+        public List<(int, bool)> oszlop;
         public Part(string sor)
         {
             List<string> sorSplit = sor.Split(' ').ToList();
@@ -22,6 +23,8 @@ namespace Dhondt
             Nemzete = int.Parse(sorSplit[1]);
             SzavazatSzam = int.Parse(sorSplit[2]);
             Szazalek = int.Parse(sorSplit[3]);
+            oszlop = Eldont();
+
         }
         public Part(string partNev, int nemzete, int szavazatSzam,int szazalek)
         {
@@ -29,6 +32,21 @@ namespace Dhondt
             Nemzete = nemzete;
             SzavazatSzam = szavazatSzam;
             Szazalek = szazalek;
+        }
+        /// <summary>
+        /// Megcsinalja a Dhondt matrixoban egy oszlopot
+        /// </summary>
+        /// <returns>A Dhondt martix egy oszlopa az adott parthoz</returns>
+        public List<(int, bool)> Eldont()
+        {
+             List<(int, bool)> oszlopa = new List<(int, bool)>();
+
+             for (int j = 0; j < Partok.Mandatum; j++)
+             {
+                    int szam = (int)Math.Round((double)SzavazatSzam / (j + 1), 0);
+                    oszlopa.Add((szam,false));
+             }
+            return oszlopa;
         }
     }
 }
