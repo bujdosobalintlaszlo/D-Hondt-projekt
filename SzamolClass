@@ -1,133 +1,84 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Security.Cryptography;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Dhondt
 {
+    /// <summary>
+    /// Ez a class tartalmaz minden számítást ami a mandátumkiosztáshoz kapcsolódik. Ha a végeredményt szeretnénk akkor elég
+    /// a Cserelget()-et használni mivel ez kiadja a pártok nevét és mellé a mandátumuk számát.
+    /// </summary>
     public class Szamol
     {
         private Partok p;
-        public Szamol()
+
+        /// <summary>
+        /// Számol osztály konstruktora, példányosítja a Partok objektumot az adott fájlnévvel.
+        /// </summary>
+        public Szamol(string fajlNev)
         {
-            p = new Partok("input.txt");
+            p = new Partok(fajlNev);
         }
 
-        //-----------------------------------------------------------------------------------------------
         /// <summary>
-        /// Megnezi, hogy bejut-e a bizonyospart. Ha igen akkor bekerul a listaba.
+        /// Számítja és visszaadja azoknak a pártoknak a listáját, amelyek átlagos szavazataránya meghaladja a megadott küszöbértéket.
         /// </summary>
-        /// <returns>Visszaadja a partok nevet amelyek bejutnak</returns>
+        /// <returns>A megadott küszöbértéket meghaladó átlagos szavazataránnyal rendelkező pártok listája.</returns>
         public List<string> KuszobSzamit()
         {
-            List<string> l = new List<string>();
             double sum = p.Parts.Sum(part => part.SzavazatSzam);
-            for (int i = 0; i < p.Parts.Count; i++)
-            {
-                if (Math.Round((double)p.Parts[i].SzavazatSzam / sum * 100) >= p.Parts[i].Szazalek)
-                {
-                    l.Add(p.Parts[i].PartNev);
-                }
-            }
-            return l;
+            return p.Parts.Where(part => Math.Round((double)part.SzavazatSzam / sum * 100) >= part.Szazalek).Select(part => part.PartNev).ToList();
         }
-        //-----------------------------------------------------------------------------------------------
-        //-----------------------------------------------------------------------------------------------
+
         /// <summary>
-        /// Meghatarozza a Kedvezmenyezett partokat
+        /// Visszaadja azon pártok neveit, amelyek kedvezményben részesülnek.
         /// </summary>
-        /// <returns>Visszaadja a kedvezmenyezett partok nevet</returns>
-        public List<string> Kedvezmenyesek()
-        {
-            List<string> ret = new List<string>();
-            for (int i = 0; i < p.Parts.Count; i++)
-            {
-                if (p.Parts[i].Nemzete == 1)
-                {
-                    ret.Add(p.Parts[i].PartNev);
-                }
-            }
-            return ret;
-        }
-        //=> p.Parts.Where(part => part.Szazalek == 1).Select(part => part.PartNev).ToList();
-        //-----------------------------------------------------------------------------------------------
-        //-----------------------------------------------------------------------------------------------
+        /// <returns>A kedvezményben részesülő pártok neveinek listája.</returns>
+        public List<string> Kedvezmenyesek() => p.Parts.Where(part => part.Nemzete == 1).Select(part => part.PartNev).ToList();
+
         /// <summary>
-        /// Kivalasztja a Mandatumszamnyi partot (ez meg nem veszi figyelembe a kedvezmenyt)
+        /// Kiosztja a mandátumokat a partok között az oszlopok alapján.
         /// </summary>
-        /// <returns>A Mandatumszamnyi erteket</returns>
-        public List<(int,string)> MandatumKioszt() 
-        {
-            List<(int, string)> a = new List<(int, string)>();
-            for (int i = 0; i < p.Parts.Count; i++)
-            {
-                for (int j = 0; j < p.Parts[i].oszlop.Count; j++)
-                {
-                    a.Add((p.Parts[i].oszlop[j].Item1,p.Parts[i].PartNev));
-                } 
-            }
-            List<(int,string)> ret = a.OrderByDescending(x => x.Item1).Take(Partok.Mandatum).ToList();
-            return ret;
-        }
+        /// <returns>A mandátumok eloszlása a partok között az oszlopok alapján.</returns>
+        public List<(int, string)> MandatumKioszt() => p.Parts.SelectMany(part => part.oszlop.Select(item => (item.Item1, part.PartNev))).OrderByDescending(x => x.Item1).Take(Partok.Mandatum).ToList();
+
+        /// <summary>
+        /// Válogat az új kedvezményezettek közül az átlagos szavazatarány alapján.
+        /// </summary>
+        /// <returns>Az átlagos szavazataránnyal rendelkező új kedvezményezettek listája.</returns>
         public List<string> UjKedvezemenyezett()
         {
             List<string> kuszob = KuszobSzamit();
             List<string> kedvezmenyesek = Kedvezmenyesek();
-            List<string> ki = new List<string>();
-            for (int i = 0; i < kedvezmenyesek.Count; i++)
-            {
-                if (!kuszob.Contains(kedvezmenyesek[i]))
-                {
-                    ki.Add(kedvezmenyesek[i]);
-                }
-            }
-            return ki;
+            return kedvezmenyesek.Where(kedv => kuszob.Contains(kedv)).ToList();
         }
 
+        /// <summary>
+        /// Kiválasztja azokat a pártokat, amelyek kedvezményezettek és nincsenek jelen a mandátumosok között.
+        /// </summary>
+        /// <returns>Azoknak a pártoknak a listája, amelyek kedvezményezettek és nincsenek jelen a mandátumosok között.</returns>
         public List<string> Cserenevek()
         {
             List<string> kedvezmenyesek = UjKedvezemenyezett();
             List<(int, string)> mandatumosok = MandatumKioszt();
-            List<string> csereNevek = new List<string>();
-            for (int i = 0; i < kedvezmenyesek.Count; i++)
-            {
-                for (int j = 0; j < mandatumosok.Count; j++)
-                {
-                    if (mandatumosok[j].Item2 != kedvezmenyesek[i])
-                    {
-                        csereNevek.Add(kedvezmenyesek[i]);
-                    }
-                }
-            }
-            return csereNevek;
+            return kedvezmenyesek.Where(kedv => !mandatumosok.Any(mand => mand.Item2 == kedv)).Distinct().ToList();
         }
-        public List<(int,string)> Cserelget()
+
+        /// <summary>
+        /// Ellenőrzi, hogy van-e kiváltságos párt és ennek megfelelően elosztja a mandátumokat.
+        /// </summary>
+        /// <returns>(Mandátumok száma,pártnév)</returns>
+        public List<(int, string)> Cserelget()
         {
             List<string> csere = Cserenevek();
-            List<(int, string)> mandatumosok = MandatumKioszt().Take(10-csere.Count).ToList();
-            foreach (var kp in csere)
+            List<(int, string)> mandatumosok = MandatumKioszt().Take(10 - csere.Count).ToList();
+            var maxValues = csere.Select(kp =>
             {
-                int max = p.Parts.Find(x => x.PartNev == kp).oszlop.Select(x=>x.Item1).Max();
-                mandatumosok.Add((max, kp));
-            }
+                int max = p.Parts.Find(x => x.PartNev == kp).oszlop.Select(x => x.Item1).Max();
+                return (max, kp);
+            });
+            mandatumosok.AddRange(maxValues);
             return mandatumosok;
         }
-            //int j = 0;
-            //for (int i = mandatumosok.Count-1; i > mandatumosok.Count-1-csere.Count; i--)
-            //{
-            //    mandatumosok[i] = (p.Parts.Select(x=>x.SzavazatSzam).Where(x=>x.Pa),csere[j]);
-            //    j++;
-            //}
-        }
-
-        //-----------------------------------------------------------------------------------------------
-        //-----------------------------------------------------------------------------------------------
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <returns></returns>
-
-        //-----------------------------------------------------------------------------------------------
     }
+}
