@@ -13,11 +13,8 @@ namespace Dhondt
         static void Main(string[] args)
         {
             Partok.Mandatum = Convert.ToInt32(File.ReadAllLines("input.txt").Take(1).First());
-            
-            Szamol sz = new Szamol("input.txt");
-            sz.Kiir();
+            Szimulacio sz = new Szimulacio();
             sz.Lefuttat();
-            Console.ReadLine();
         }
     }
 }
