@@ -1,8 +1,6 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Dhondt
 {
@@ -24,28 +22,25 @@ namespace Dhondt
             SzavazatSzam = int.Parse(sorSplit[2]);
             Szazalek = int.Parse(sorSplit[3]);
             oszlop = Eldont();
-
+            Partok.Partszam++;
         }
-        public Part(string partNev, int nemzete, int szavazatSzam,int szazalek)
+        public Part(string partNev, int nemzete, int szavazatSzam, int szazalek)
         {
             PartNev = partNev;
             Nemzete = nemzete;
             SzavazatSzam = szavazatSzam;
             Szazalek = szazalek;
         }
-        /// <summary>
-        /// Megcsinalja a Dhondt matrixoban egy oszlopot
-        /// </summary>
-        /// <returns>A Dhondt martix egy oszlopa az adott parthoz</returns>
+        
         public List<(int, bool)> Eldont()
         {
-             List<(int, bool)> oszlopa = new List<(int, bool)>();
+            List<(int, bool)> oszlopa = new List<(int, bool)>();
 
-             for (int j = 0; j < Partok.Mandatum; j++)
-             {
-                    int szam = (int)Math.Round((double)SzavazatSzam / (j + 1), 0);
-                    oszlopa.Add((szam,false));
-             }
+            for (int j = 0; j < Partok.Mandatum; j++)
+            {
+                int szam = (int)Math.Round((double)SzavazatSzam / (j + 1), 0);
+                oszlopa.Add((szam, false));
+            }
             return oszlopa;
         }
     }
