@@ -1,31 +1,50 @@
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using System.IO;
+
 
 namespace Dhondt
 {
     public class Szimulacio
     {
+        private static Random r = new Random();
         public Szimulacio()
         {
 
         }
         public void Lefuttat()
         {
-            Szamol sz = new Szamol();
-            //MatrixMegjelenit(sz.MatrixKi());
-            List<(int,string)> k = sz.Cserelget();
-            foreach (var item in k)
+            int db = 2;
+            General(db,r.Next(15,100),r.Next(15,93));
+            for (int i = 0; i < db+1; i++)
             {
-                Console.WriteLine("{0} {1}",item.Item1,item.Item2);
+                Szamol sz = new Szamol($"inp{i}.txt");
+                List<(int, string)> k = sz.Cserelget();
+                foreach (var item in k)
+                {
+                    Console.WriteLine("{0} {1}", item.Item1, item.Item2);
+                }
+                Console.WriteLine("----------------------");
+            }
+            
+        }
+        public void General(int db, int partSzam, int mandatumSzam)
+        {
+            int n = 1;
+            while (n <= db)
+            {
+                using (StreamWriter w = new StreamWriter($"inp{n}.txt"))
+                {
+                    
+                    List<int> szazalekok = new List<int>() { 5, 10, 15 };
+                    w.WriteLine(mandatumSzam);
+                    for (int i = 1; i <= partSzam; i++)
+                    {
+                        w.WriteLine($"Párt{i} {r.Next(0, 2)} {r.Next(1000, 100000)} {szazalekok[r.Next(0, 3)]}");
+                    }
+                }
+                n++;
             }
         }
-        public void MatrixMegjelenit(List<int> l)
-        {
-
-        }
-
     }
 }
