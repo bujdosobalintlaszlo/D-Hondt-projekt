@@ -15,12 +15,16 @@ namespace Dhondt
         public void Lefuttat()
         {
             Szamol sz = new Szamol();
-            MatrixMegjelenit(sz.MatrixKi());
-            
+            //MatrixMegjelenit(sz.MatrixKi());
+            List<(int,string)> k = sz.Cserelget();
+            foreach (var item in k)
+            {
+                Console.WriteLine("{0} {1}",item.Item1,item.Item2);
+            }
         }
         public void MatrixMegjelenit(List<int> l)
         {
-            
+
         }
 
     }
