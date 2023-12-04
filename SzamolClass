@@ -14,26 +14,7 @@ namespace Dhondt
         {
             p = new Partok("input.txt");
         }
-        //-----------------------------------------------------------------------------------------------
-        /// <summary>
-        /// Megcsinalja a Dhondt matrixot
-        /// </summary>
-        /// <returns>A Dhondt martix egy lista formajaban</returns>
-        public List<int> MatrixKi()
-        {
-            List<int> MatrixSzamok = new List<int>();
 
-            for (int i = 0; i < Partok.Partszam; i++)
-            {
-                for (int j = 0; j < Partok.Mandatum; j++)
-                {
-                    int szam = (int)Math.Round((double)p.Parts[i].SzavazatSzam / (j + 1), 0);
-                    MatrixSzamok.Add(szam);
-                }
-            }
-            return MatrixSzamok;
-        }
-        //-----------------------------------------------------------------------------------------------
         //-----------------------------------------------------------------------------------------------
         /// <summary>
         /// Megnezi, hogy bejut-e a bizonyospart. Ha igen akkor bekerul a listaba.
@@ -43,9 +24,9 @@ namespace Dhondt
         {
             List<string> l = new List<string>();
             double sum = p.Parts.Sum(part => part.SzavazatSzam);
-            for (int i = 0; i < Partok.Partszam; i++)
+            for (int i = 0; i < p.Parts.Count; i++)
             {
-                if (Math.Round(p.Parts[i].SzavazatSzam / sum * 100) > p.Parts[i].Szazalek)
+                if (Math.Round((double)p.Parts[i].SzavazatSzam / sum * 100) >= p.Parts[i].Szazalek)
                 {
                     l.Add(p.Parts[i].PartNev);
                 }
@@ -58,32 +39,95 @@ namespace Dhondt
         /// Meghatarozza a Kedvezmenyezett partokat
         /// </summary>
         /// <returns>Visszaadja a kedvezmenyezett partok nevet</returns>
-        public List<string> Kedvezmenyesek() => p.Parts.Where(part => part.Szazalek == 1).Select(part => part.PartNev).ToList();
+        public List<string> Kedvezmenyesek()
+        {
+            List<string> ret = new List<string>();
+            for (int i = 0; i < p.Parts.Count; i++)
+            {
+                if (p.Parts[i].Nemzete == 1)
+                {
+                    ret.Add(p.Parts[i].PartNev);
+                }
+            }
+            return ret;
+        }
+        //=> p.Parts.Where(part => part.Szazalek == 1).Select(part => part.PartNev).ToList();
         //-----------------------------------------------------------------------------------------------
         //-----------------------------------------------------------------------------------------------
         /// <summary>
         /// Kivalasztja a Mandatumszamnyi partot (ez meg nem veszi figyelembe a kedvezmenyt)
         /// </summary>
         /// <returns>A Mandatumszamnyi erteket</returns>
-        public List<int> MandatumKioszt(List<int> l) => l.OrderBy(x => x).Take(Partok.Mandatum).ToList();
+        public List<(int,string)> MandatumKioszt() 
+        {
+            List<(int, string)> a = new List<(int, string)>();
+            for (int i = 0; i < p.Parts.Count; i++)
+            {
+                for (int j = 0; j < p.Parts[i].oszlop.Count; j++)
+                {
+                    a.Add((p.Parts[i].oszlop[j].Item1,p.Parts[i].PartNev));
+                } 
+            }
+            List<(int,string)> ret = a.OrderByDescending(x => x.Item1).Take(Partok.Mandatum).ToList();
+            return ret;
+        }
+        public List<string> UjKedvezemenyezett()
+        {
+            List<string> kuszob = KuszobSzamit();
+            List<string> kedvezmenyesek = Kedvezmenyesek();
+            List<string> ki = new List<string>();
+            for (int i = 0; i < kedvezmenyesek.Count; i++)
+            {
+                if (!kuszob.Contains(kedvezmenyesek[i]))
+                {
+                    ki.Add(kedvezmenyesek[i]);
+                }
+            }
+            return ki;
+        }
+
+        public List<string> Cserenevek()
+        {
+            List<string> kedvezmenyesek = UjKedvezemenyezett();
+            List<(int, string)> mandatumosok = MandatumKioszt();
+            List<string> csereNevek = new List<string>();
+            for (int i = 0; i < kedvezmenyesek.Count; i++)
+            {
+                for (int j = 0; j < mandatumosok.Count; j++)
+                {
+                    if (mandatumosok[j].Item2 != kedvezmenyesek[i])
+                    {
+                        csereNevek.Add(kedvezmenyesek[i]);
+                    }
+                }
+            }
+            return csereNevek;
+        }
+        public List<(int,string)> Cserelget()
+        {
+            List<string> csere = Cserenevek();
+            List<(int, string)> mandatumosok = MandatumKioszt().Take(10-csere.Count).ToList();
+            foreach (var kp in csere)
+            {
+                int max = p.Parts.Find(x => x.PartNev == kp).oszlop.Select(x=>x.Item1).Max();
+                mandatumosok.Add((max, kp));
+            }
+            return mandatumosok;
+        }
+            //int j = 0;
+            //for (int i = mandatumosok.Count-1; i > mandatumosok.Count-1-csere.Count; i--)
+            //{
+            //    mandatumosok[i] = (p.Parts.Select(x=>x.SzavazatSzam).Where(x=>x.Pa),csere[j]);
+            //    j++;
+            //}
+        }
+
         //-----------------------------------------------------------------------------------------------
         //-----------------------------------------------------------------------------------------------
         /// <summary>
         /// 
         /// </summary>
         /// <returns></returns>
-        public List<Tuple<int, string>> Kioszt()
-        {
-            List<Tuple<int,string>> ret = new List<Tuple<int, string>>();
-            List<int> matrixLista = MatrixKi();
-            List<string> kedvezmenyezettPartok = Kedvezmenyesek();
-            List<string> bejutottak = KuszobSzamit();
-            List<int> mandatumok = MandatumKioszt(matrixLista);
 
-
-
-            return ret;
-        }
         //-----------------------------------------------------------------------------------------------
     }
-}
