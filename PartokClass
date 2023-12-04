@@ -2,8 +2,6 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Dhondt
 {
@@ -19,7 +17,7 @@ namespace Dhondt
         public Partok()
         {
             Parts = new List<Part>();
-            
+
         }
 
         /// <summary>
@@ -28,8 +26,8 @@ namespace Dhondt
         /// <param name="sor">A sor, amelyből inicializáljuk a Partok objektumot.</param>
         public Partok(string fajlNev)
         {
-            Parts=File.ReadAllLines(fajlNev).Skip(1).Select(sor => new Part(sor)).ToList();
-            Partszam++;
+            Mandatum = Convert.ToInt32(File.ReadAllLines(fajlNev).Take(1).First());
+            Parts = File.ReadAllLines(fajlNev).Skip(1).Select(sor => new Part(sor)).ToList();
         }
     }
 }
