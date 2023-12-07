@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net.Mail;
 
 namespace Dhondt
 {
@@ -71,7 +72,7 @@ namespace Dhondt
         public List<(int, string)> Cserelget()
         {
             List<string> csere = Cserenevek();
-            List<(int, string)> mandatumosok = MandatumKioszt().Take(10 - csere.Count).ToList();
+            List<(int, string)> mandatumosok = MandatumKioszt().Take(Partok.Mandatum - csere.Count).ToList();
             var maxValues = csere.Select(kp =>
             {
                 int max = p.Parts.Find(x => x.PartNev == kp).oszlop.Select(x => x.Item1).Max();
@@ -80,5 +81,31 @@ namespace Dhondt
             mandatumosok.AddRange(maxValues);
             return mandatumosok;
         }
+
+        public void Atfordit()
+        {
+            List<(int, string)> mandList = Cserelget();
+
+            foreach (var mand in mandList)
+            {
+                string partName = mand.Item2;
+                int numberToFind = mand.Item1;
+
+                Part foundPart = p.Parts.FirstOrDefault(part => part.PartNev == partName);
+
+                if (foundPart != null)
+                {
+                    for (int i = 0; i < foundPart.oszlop.Count; i++)
+                    {
+                        if (foundPart.oszlop[i].Item1 == numberToFind && foundPart.oszlop[i].Item2 == false)
+                        {
+                            foundPart.oszlop[i] = (numberToFind, true);
+                            Console.WriteLine(p.Parts[i].oszlop[i].Item2);
+                        }
+                    }
+                }
+            }
+        }
+
     }
 }
