@@ -1,12 +1,13 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
-
+using System.Linq;
 
 namespace Dhondt
 {
     public class Szimulacio
     {
+        private int counter = 1;
         private static Random r = new Random();
         public Szimulacio()
         {
@@ -15,18 +16,20 @@ namespace Dhondt
         public void Lefuttat()
         {
             int db = 2;
-            General(db,r.Next(15,100),r.Next(15,93));
-            for (int i = 0; i < db+1; i++)
+            General(db, r.Next(15, 100), r.Next(15, 93));
+            for (int i = 0; i < db + 1; i++)
             {
                 Szamol sz = new Szamol($"inp{i}.txt");
+                sz.Atfordit();
                 List<(int, string)> k = sz.Cserelget();
-                foreach (var item in k)
-                {
-                    Console.WriteLine("{0} {1}", item.Item1, item.Item2);
-                }
-                Console.WriteLine("----------------------");
+                /*
+                ElsoTablaKiir(sz.p);
+                MasodikTabla(sz.p);
+                HarmadikTablaKiir(k);
+                */
+                NegyedikTabla(k);
             }
-            
+
         }
         public void General(int db, int partSzam, int mandatumSzam)
         {
@@ -35,7 +38,7 @@ namespace Dhondt
             {
                 using (StreamWriter w = new StreamWriter($"inp{n}.txt"))
                 {
-                    
+
                     List<int> szazalekok = new List<int>() { 5, 10, 15 };
                     w.WriteLine(mandatumSzam);
                     for (int i = 1; i <= partSzam; i++)
@@ -45,6 +48,107 @@ namespace Dhondt
                 }
                 n++;
             }
+        }
+
+        public void ElsoTablaKiir(Partok p)
+        {
+            int maxPartNevLength = p.Parts.Max(x => x.PartNev.Length);
+            Console.WriteLine($"{counter} választási eredmény");
+            p.Parts.ForEach(x =>
+            {
+                string paddedPartNev = x.PartNev.PadRight(maxPartNevLength);
+                string szavazatSzamText = x.SzavazatSzam.ToString().PadRight(maxPartNevLength);
+                Console.WriteLine($"{paddedPartNev} - {szavazatSzamText}");
+            });
+            using (StreamWriter w = new StreamWriter($"{counter}valasztasiEredmeny"))
+            {
+                w.WriteLine($"{counter} választási eredmény");
+                p.Parts.ForEach(x =>
+                {
+                    w.WriteLine($"{x.PartNev} - {x.SzavazatSzam}");
+                });
+            }
+           Console.WriteLine();
+        }
+
+        public void MasodikTabla(Partok p)
+        {
+            using (StreamWriter w = new StreamWriter($"{counter}választás.txt"))
+            {
+                Console.WriteLine($"{counter} - D'Hondt mátrix számítása");
+                w.WriteLine($"{counter}választás");
+                foreach (var item in p.Parts)
+                {
+                    w.Write("Osztói:");
+                    for (int i = 0; i < item.oszlop.Count; i++)
+                    {
+                        w.Write(item.oszlop[i].Item1 + " ");
+                    }
+                    w.WriteLine();
+                }
+            }
+
+            Console.WriteLine("D'Hondt mátrix számítása");
+            Console.WriteLine($"{counter} - D'Hondt mátrix számítása");
+            Console.WriteLine($"{counter}választás");
+            foreach (var item in p.Parts)
+            {
+                Console.Write("Osztói:");
+                for (int i = 0; i < item.oszlop.Count; i++)
+                {
+                    if (item.oszlop[i].Item2)
+                    {
+                        Console.BackgroundColor = ConsoleColor.Red;
+                        Console.Write(item.oszlop[i].Item1 + " ");
+                        Console.BackgroundColor = ConsoleColor.Black;
+                    }
+                    else
+                    {
+                        Console.Write(item.oszlop[i].Item1 + " ");
+                    }
+                }
+                Console.WriteLine();
+            }
+        }
+        public void HarmadikTablaKiir(List<(int, string)> l)
+        {
+            Dictionary<string, int> stringCounts = new Dictionary<string, int>();
+            foreach (var tuple in l)
+            {
+                string currentString = tuple.Item2;
+
+                if (stringCounts.ContainsKey(currentString))
+                {
+                    stringCounts[currentString]++;
+                }
+                else
+                {
+                    stringCounts[currentString] = 1;
+                }
+            }
+            List<string> result = stringCounts.Select(pair => $"{pair.Key}: {pair.Value}").ToList();
+            result.Sort();
+            stringCounts.OrderBy(x => x.Value);
+            foreach (string entry in result)
+            {
+                Console.WriteLine(entry);
+            }
+            using (StreamWriter w = new StreamWriter($"{counter}valasztasvegeredmenye"))
+            {
+                w.WriteLine($"{counter}. választás végeredménye");
+                foreach (string entry in result)
+                {
+                    w.WriteLine(entry);
+                }
+
+            }
+            Console.WriteLine();
+            counter++;
+        }
+
+        public void NegyedikTabla(List<(int, string)> l)
+        {
+            
         }
     }
 }
