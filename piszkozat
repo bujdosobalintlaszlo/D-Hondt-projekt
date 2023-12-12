@@ -1,0 +1,183 @@
+using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
+
+namespace Dhondt
+{
+    class Szimulacio
+    {
+        private int counter = 1;
+        private static Random r = new Random();
+        private Partok p;
+        public Szimulacio()
+        {
+
+        }
+        public void Lefuttat()
+        {
+            int db = 2;
+            General(db, r.Next(15, 100), r.Next(15, 93));
+            for (int i = 0; i < db + 1; i++)
+            {
+                Szamol sz = new Szamol($"inp{i}.txt");
+                p = new Partok($"inp{i}.txt");
+                sz.Atfordit();
+                List<(int, string)> k = sz.Cserelget();
+
+                /*
+                 ElsoTablaKiir(sz.p);
+                 MasodikTabla(sz.p);
+                 HarmadikTablaKiir(k);
+                */
+                //NegyedikTabla(p);
+                OtodikTabla(k);
+            }
+
+        }
+        public void General(int db, int partSzam, int mandatumSzam)
+        {
+            int n = 1;
+            while (n <= db)
+            {
+                using (StreamWriter w = new StreamWriter($"inp{n}.txt"))
+                {
+
+                    List<int> szazalekok = new List<int>() { 5, 10, 15 };
+                    w.WriteLine(mandatumSzam);
+                    for (int i = 1; i <= partSzam; i++)
+                    {
+                        w.WriteLine($"Párt{i} {r.Next(0, 2)} {r.Next(1000, 100000)} {szazalekok[r.Next(0, 3)]}");
+                    }
+                }
+                n++;
+            }
+        }
+
+        public void ElsoTablaKiir(Partok p)
+        {
+            int maxPartNevLength = p.Parts.Max(x => x.PartNev.Length);
+            Console.WriteLine($"{counter} választási eredmény");
+            p.Parts.ForEach(x =>
+            {
+                string paddedPartNev = x.PartNev.PadRight(maxPartNevLength);
+                string szavazatSzamText = x.SzavazatSzam.ToString().PadRight(maxPartNevLength);
+                Console.WriteLine($"{paddedPartNev} - {szavazatSzamText}");
+            });
+            using (StreamWriter w = new StreamWriter($"{counter}valasztasiEredmeny"))
+            {
+                w.WriteLine($"{counter} választási eredmény");
+                p.Parts.ForEach(x =>
+                {
+                    w.WriteLine($"{x.PartNev} - {x.SzavazatSzam}");
+                });
+            }
+            Console.WriteLine();
+        }
+
+        public void MasodikTabla(Partok p)
+        {
+            using (StreamWriter w = new StreamWriter($"{counter}választás.txt"))
+            {
+                Console.WriteLine($"{counter} - D'Hondt mátrix számítása");
+                w.WriteLine($"{counter}választás");
+                foreach (var item in p.Parts)
+                {
+                    w.Write("Osztói:");
+                    for (int i = 0; i < item.oszlop.Count; i++)
+                    {
+                        w.Write(item.oszlop[i].Item1 + " ");
+                    }
+                    w.WriteLine();
+                }
+            }
+
+            Console.WriteLine("D'Hondt mátrix számítása");
+            Console.WriteLine($"{counter} - D'Hondt mátrix számítása");
+            Console.WriteLine($"{counter}választás");
+            foreach (var item in p.Parts)
+            {
+                Console.Write("Osztói:");
+                for (int i = 0; i < item.oszlop.Count; i++)
+                {
+                    if (item.oszlop[i].Item2)
+                    {
+                        Console.BackgroundColor = ConsoleColor.Red;
+                        Console.Write(item.oszlop[i].Item1 + " ");
+                        Console.BackgroundColor = ConsoleColor.Black;
+                    }
+                    else
+                    {
+                        Console.Write(item.oszlop[i].Item1 + " ");
+                    }
+                }
+                Console.WriteLine();
+            }
+        }
+        public void HarmadikTablaKiir(List<(int, string)> l)
+        {
+            Dictionary<string, int> stringCounts = new Dictionary<string, int>();
+            foreach (var tuple in l)
+            {
+                string currentString = tuple.Item2;
+
+                if (stringCounts.ContainsKey(currentString))
+                {
+                    stringCounts[currentString]++;
+                }
+                else
+                {
+                    stringCounts[currentString] = 1;
+                }
+            }
+            List<string> result = stringCounts.Select(pair => $"{pair.Key}: {pair.Value}").ToList();
+            result.Sort();
+            stringCounts.OrderBy(x => x.Value);
+            foreach (string entry in result)
+            {
+                Console.WriteLine(entry);
+            }
+            using (StreamWriter w = new StreamWriter($"{counter}valasztasvegeredmenye"))
+            {
+                w.WriteLine($"{counter}. választás végeredménye");
+                foreach (string entry in result)
+                {
+                    w.WriteLine(entry);
+                }
+
+            }
+            Console.WriteLine();
+            counter++;
+        }
+
+        public void NegyedikTabla(Partok p)
+        {
+            int ossz = p.Parts.Sum(x => x.SzavazatSzam);
+            p.Parts.ForEach(x => {
+                Console.WriteLine(Math.Round((double)x.SzavazatSzam / ossz*100,1));
+            });
+            Console.WriteLine(ossz);
+            using (StreamWriter w = new StreamWriter($"{counter}Statisztika1.txt"))
+            {
+                w.WriteLine("Statisztika1");
+                p.Parts.ForEach(x => {
+                    w.WriteLine(Math.Round((double)x.SzavazatSzam / ossz * 100, 1));
+                });
+            }
+        }
+
+        public void OtodikTabla(List<(int, string)> l)
+        {
+            List<string> volt = new List<string>();
+            l.ForEach(x =>
+            {
+                if (!volt.Contains(x.Item2))
+                {
+                    Console.WriteLine(p.Parts.Select(y => y.oszlop[0].Item1).Where(y => y == x.Item1));
+                    volt.Add(x.Item2);
+                }
+            });
+        
+        }
+    }
+}
