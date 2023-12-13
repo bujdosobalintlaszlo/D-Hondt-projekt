@@ -10,9 +10,22 @@ namespace Dhondt
     /// </summary>
     public class Partok
     {
-        public static int Partszam { get; set; }
-        public static int Mandatum { get; set; }
         public List<Part> Parts { get; set; }
+        public int Partszam
+        {
+            get
+            {
+                return Parts.Count;
+            }
+        }
+        private static int mandatum;
+        public static int Mandatum
+        {
+            get
+            {
+                return mandatum;
+            }
+        }
 
         public Partok()
         {
@@ -26,7 +39,7 @@ namespace Dhondt
         /// <param name="sor">A sor, amelyből inicializáljuk a Partok objektumot.</param>
         public Partok(string fajlNev)
         {
-            Mandatum = Convert.ToInt32(File.ReadAllLines(fajlNev).Take(1).First());
+            mandatum = Convert.ToInt32(File.ReadAllLines(fajlNev).Take(1).First());
             Parts = File.ReadAllLines(fajlNev).Skip(1).Select(sor => new Part(sor)).ToList();
         }
     }
