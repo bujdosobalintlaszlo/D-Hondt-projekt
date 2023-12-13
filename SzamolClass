@@ -9,9 +9,9 @@ namespace Dhondt
     /// Ez a class tartalmaz minden számítást ami a mandátumkiosztáshoz kapcsolódik. Ha a végeredményt szeretnénk akkor elég
     /// a Cserelget()-et használni mivel ez kiadja a pártok nevét és mellé a mandátumuk számát.
     /// </summary>
-    public class Szamol
+    class Szamol
     {
-        private Partok p;
+        public Partok p { get; }
 
         /// <summary>
         /// Számol osztály konstruktora, példányosítja a Partok objektumot az adott fájlnévvel.
@@ -30,7 +30,7 @@ namespace Dhondt
             double sum = p.Parts.Sum(part => part.SzavazatSzam);
             return p.Parts.Where(part => Math.Round((double)part.SzavazatSzam / sum * 100) >= part.Szazalek).Select(part => part.PartNev).ToList();
         }
-
+        
         /// <summary>
         /// Visszaadja azon pártok neveit, amelyek kedvezményben részesülnek.
         /// </summary>
@@ -81,7 +81,9 @@ namespace Dhondt
             mandatumosok.AddRange(maxValues);
             return mandatumosok;
         }
-
+        /// <summary>
+        /// Átforgatja truera az adott párt oszlopjában az Item2 ha kap mandátumot
+        /// </summary>
         public void Atfordit()
         {
             List<(int, string)> mandList = Cserelget();
@@ -100,7 +102,6 @@ namespace Dhondt
                         if (foundPart.oszlop[i].Item1 == numberToFind && foundPart.oszlop[i].Item2 == false)
                         {
                             foundPart.oszlop[i] = (numberToFind, true);
-                            Console.WriteLine(p.Parts[i].oszlop[i].Item2);
                         }
                     }
                 }
