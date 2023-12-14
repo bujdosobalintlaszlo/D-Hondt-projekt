@@ -1,0 +1,26 @@
+using NUnit.Framework;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace Dhondt
+{
+    [TestFixture]
+    class TesztClass
+    {
+        private static readonly int[] szazalekok = new int[3] { 5, 10, 15 };
+        [Test]
+        public void MyTest([Random(30000, 300000, 1)] int szavSzama, [Random(0, 1, 1)] int nemzetiE, [Random(0, 3, 5)] int index)
+        {
+            string sor = $"TesztPart {nemzetiE} {szavSzama} {szazalekok[index]}";
+            Part p = new Part(sor);
+            int vart = (int)Math.Round((double)p.SzavazatSzam / 3, 0);
+            //Assert.That(vart, Is.EqualTo(p.oszlop[0].Item1));
+            Assert.AreEqual(vart, p.oszlop[0].Item1);
+        }
+    }
+}
+
+
