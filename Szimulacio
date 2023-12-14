@@ -5,7 +5,7 @@ using System.Linq;
 
 namespace Dhondt
 {
-    public class Szimulacio
+    class Szimulacio
     {
         private int counter = 1;
         private static Random r = new Random();
@@ -22,15 +22,16 @@ namespace Dhondt
                 Szamol sz = new Szamol($"inp{i}.txt");
                 sz.Atfordit();
                 List<(int, string)> k = sz.Cserelget();
-                /*
                 ElsoTablaKiir(sz.p);
                 MasodikTabla(sz.p);
                 HarmadikTablaKiir(k);
-                */
                 NegyedikTabla(k);
             }
 
         }
+
+
+
         public void General(int db, int partSzam, int mandatumSzam)
         {
             int n = 1;
