@@ -9,10 +9,10 @@ namespace Dhondt
     /// </summary>
     public class Part
     {
-        public string PartNev { get; set; }
-        public int Nemzete { get; set; }
-        public int SzavazatSzam { get; set; }
-        public int Szazalek { get; set; }
+        public string PartNev { get;}
+        public int Nemzete { get; }
+        public int SzavazatSzam { get;}
+        public int Szazalek { get; }
         public List<(int, bool)> oszlop;
         public Part(string sor)
         {
@@ -22,7 +22,7 @@ namespace Dhondt
             SzavazatSzam = int.Parse(sorSplit[2]);
             Szazalek = int.Parse(sorSplit[3]);
             oszlop = Eldont();
-            Partok.Partszam++;
+            //Partok.Partszam++;
         }
         public Part(string partNev, int nemzete, int szavazatSzam, int szazalek)
         {
@@ -31,7 +31,7 @@ namespace Dhondt
             SzavazatSzam = szavazatSzam;
             Szazalek = szazalek;
         }
-        
+
         public List<(int, bool)> Eldont()
         {
             List<(int, bool)> oszlopa = new List<(int, bool)>();
