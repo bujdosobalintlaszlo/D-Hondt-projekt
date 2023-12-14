@@ -2,7 +2,6 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net.Mail;
-using NUnit.Framework;
 
 namespace Dhondt
 {
@@ -23,35 +22,30 @@ namespace Dhondt
         }
 
         /// <summary>
-        /// Számítja és visszaadja azoknak a pártoknak a listáját, amelyek átlagos szavazataránya meghaladja a megadott küszöbértéket.
+        /// Számítja és visszaadja azoknak a pártoknak a listáját, amelyek átlépnek a százalékos küszöb értékükön.(minden pártnak az utolsó adattagja a százalék értéke)
         /// </summary>
-        /// <returns>A megadott küszöbértéket meghaladó átlagos szavazataránnyal rendelkező pártok listája.</returns>
+        /// <returns>A megadott küszöbértéket meghaladó pártok listája.</returns>
         public List<string> KuszobSzamit()
         {
             double sum = p.Parts.Sum(part => part.SzavazatSzam);
             return p.Parts.Where(part => Math.Round((double)part.SzavazatSzam / sum * 100) >= part.Szazalek).Select(part => part.PartNev).ToList();
         }
-        [Test]
-        public void KuszobTeszt()
-        { 
-            
-        }
         /// <summary>
-        /// Visszaadja azon pártok neveit, amelyek kedvezményben részesülnek.
+        /// Visszaadja azon pártok neveit, amelyek kedvezményben részesülnek.(tehát a nemzetiség mezőn 1-es szám található)
         /// </summary>
         /// <returns>A kedvezményben részesülő pártok neveinek listája.</returns>
         public List<string> Kedvezmenyesek() => p.Parts.Where(part => part.Nemzete == 1).Select(part => part.PartNev).ToList();
 
         /// <summary>
-        /// Kiosztja a mandátumokat a partok között az oszlopok alapján.
+        /// Kiosztja a mandátumokat a partok között az oszlopok alapján.(Kiválasztja a mandátumszámnyszi legnagyobb számot.)
         /// </summary>
-        /// <returns>A mandátumok eloszlása a partok között az oszlopok alapján.</returns>
+        /// <returns>A mandátumot kapó szavazatszám értéke és pártneve lista.</returns>
         public List<(int, string)> MandatumKioszt() => p.Parts.SelectMany(part => part.oszlop.Select(item => (item.Item1, part.PartNev))).OrderByDescending(x => x.Item1).Take(Partok.Mandatum).ToList();
 
         /// <summary>
-        /// Válogat az új kedvezményezettek közül az átlagos szavazatarány alapján.
+        /// Összefésüli azokat a pártokat melyek kedvezményezettek (nemzetiségiek) és a küszöböt is átlépték.
         /// </summary>
-        /// <returns>Az átlagos szavazataránnyal rendelkező új kedvezményezettek listája.</returns>
+        /// <returns>String típusú lista mely a fenti tulajdonságú Pártnevekkel tér vissza.</returns>
         public List<string> UjKedvezemenyezett()
         {
             List<string> kuszob = KuszobSzamit();
@@ -60,9 +54,9 @@ namespace Dhondt
         }
 
         /// <summary>
-        /// Kiválasztja azokat a pártokat, amelyek kedvezményezettek és nincsenek jelen a mandátumosok között.
+        /// Kiválasztja azokat a pártokat, amelyek kedvezményezettek de nincsenek jelen a mandátumosok között.
         /// </summary>
-        /// <returns>Azoknak a pártoknak a listája, amelyek kedvezményezettek és nincsenek jelen a mandátumosok között.</returns>
+        /// <returns>Azoknak a pártoknak a listája, amelyek kedvezményezettek de nincsenek jelen a mandátumosok között.</returns>
         public List<string> Cserenevek()
         {
             List<string> kedvezmenyesek = UjKedvezemenyezett();
@@ -71,9 +65,9 @@ namespace Dhondt
         }
 
         /// <summary>
-        /// Ellenőrzi, hogy van-e kiváltságos párt és ennek megfelelően elosztja a mandátumokat.
+        /// Ellenőrzi, hogy van-e kiváltságos párt ami nem kapott mandátumot és ennek megfelelően kicserélgeti őket.
         /// </summary>
-        /// <returns>(Mandátumok száma,pártnév)</returns>
+        /// <returns>(Szavazatszám mellyel mandátumot ért el,pártnév)</returns>
         public List<(int, string)> Cserelget()
         {
             List<string> csere = Cserenevek();
@@ -87,7 +81,7 @@ namespace Dhondt
             return mandatumosok;
         }
         /// <summary>
-        /// Átforgatja truera az adott párt oszlopjában az Item2 ha kap mandátumot
+        /// Átforgatja truera az adott párt oszlopjában az Item2 ha mandátumot ért el vele.
         /// </summary>
         public void Atfordit()
         {
