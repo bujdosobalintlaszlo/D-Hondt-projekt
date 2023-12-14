@@ -8,7 +8,7 @@ namespace Dhondt
     /// <summary>
     /// A pártokat és kapcsolódó adatokat tároló osztály.
     /// </summary>
-    public class Partok
+    class Partok
     {
         public List<Part> Parts { get; set; }
         public int Partszam
