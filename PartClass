@@ -1,3 +1,4 @@
+using NUnit.Framework;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -7,13 +8,13 @@ namespace Dhondt
     /// <summary>
     /// A pártot reprezentáló osztály, tárolja a párt nevét, nemzetét és szavazatszámát.
     /// </summary>
-    public class Part
+    class Part
     {
-        public string PartNev { get;}
+        public string PartNev { get; }
         public int Nemzete { get; }
-        public int SzavazatSzam { get;}
+        public int SzavazatSzam { get; }
         public int Szazalek { get; }
-        public List<(int, bool)> oszlop;
+        public List<(int, bool)> oszlop { get; }
         public Part(string sor)
         {
             List<string> sorSplit = sor.Split(' ').ToList();
@@ -22,7 +23,6 @@ namespace Dhondt
             SzavazatSzam = int.Parse(sorSplit[2]);
             Szazalek = int.Parse(sorSplit[3]);
             oszlop = Eldont();
-            //Partok.Partszam++;
         }
         public Part(string partNev, int nemzete, int szavazatSzam, int szazalek)
         {
@@ -44,4 +44,20 @@ namespace Dhondt
             return oszlopa;
         }
     }
+
+    [TestFixture]
+    public class TesztClass
+    {
+        private static readonly int[] szazalekok = new int[3] { 5, 10, 15 };
+
+        [Test]
+        public void MyTest([Random(30000, 300000, 1)] int szavSzama, [Random(0, 1, 1)] int nemzetiE, [Random(0, 2, 5)] int index)
+        {
+            string sor = $"TesztPart {nemzetiE} {szavSzama} {szazalekok[index]}";
+            Part p = new Part(sor);
+            int vart = (int)Math.Round((double)p.SzavazatSzam / 3, 0);
+            Assert.That(p.oszlop[2].Item1, Is.EqualTo(vart));
+        }
+    }
 }
+  
