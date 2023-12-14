@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net.Mail;
+using NUnit.Framework;
 
 namespace Dhondt
 {
@@ -30,7 +31,11 @@ namespace Dhondt
             double sum = p.Parts.Sum(part => part.SzavazatSzam);
             return p.Parts.Where(part => Math.Round((double)part.SzavazatSzam / sum * 100) >= part.Szazalek).Select(part => part.PartNev).ToList();
         }
-        
+        [Test]
+        public void KuszobTeszt()
+        { 
+            
+        }
         /// <summary>
         /// Visszaadja azon pártok neveit, amelyek kedvezményben részesülnek.
         /// </summary>
