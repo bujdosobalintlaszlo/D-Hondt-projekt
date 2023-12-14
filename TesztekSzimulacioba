@@ -1,0 +1,70 @@
+        //----------------------------------------------------------------------------------------------------------------------------------------------
+        //Tesztek kezdete
+        //itt stringé kell csinálni az l-t meg az eredmenyt is
+        [Test]
+        [TestCase("PártA PártB PártC PártD")]
+        public void KuszobTeszt(string vart)
+        {
+            List<string> l = vart.Split(' ').ToList();
+            Szamol tSz = new Szamol("inp0.txt");
+            List<string> tSzEredmeny = tSz.KuszobSzamit();
+            Assert.AreEqual(l, tSzEredmeny);
+        }
+
+        [Test]
+        [TestCase("PártA PártB PártC PártE PártF")]
+        public void KedvezmenyesekTeszt(string vart)
+        {
+            List<string> l = vart.Split(' ').ToList();
+            Szamol tSz = new Szamol("inp0.txt");
+            List<string> tSzEredmeny = tSz.Kedvezmenyesek();                    
+            CollectionAssert.AreEqual(l, tSzEredmeny);
+        }
+        [Test]
+        [TestCase("PártA 5 PártB 2 PártC 2 PártD 1")]
+        public void MandatumKiosztTeszt(string sor)
+        {
+            Szamol sz = new Szamol("inp0.txt");
+            List<(int, string)> vart = new List<(int, string)>();
+            string[] sorSplit = sor.Split(' ');
+            for (int i = 0; i < sorSplit.Length-1; i++)
+            {
+                vart.Add((int.Parse(sorSplit[i]),sorSplit[i+1]));
+            }
+            List<(int, string)> eredmeny = sz.MandatumKioszt();
+            CollectionAssert.AreEqual(vart, eredmeny);
+        }
+        [Test]
+        [TestCase("PártA PártB PártC PártE")]
+        public void UjKedvezemenyezett(string sor)
+        {
+            Szamol sz = new Szamol("inp0.txt");
+            List<string> vart = sor.Split(' ').ToList();
+            List<string> e = sz.UjKedvezemenyezett();
+            CollectionAssert.AreEqual(vart, e);
+        }
+        [Test]
+        [TestCase("PártE")]
+        public void CserenevekTeszt(string sor)
+        {
+            Szamol sz = new Szamol("inp0.txt");
+            List<string> vart = sor.Split(' ').ToList();
+            List<string> e = sz.Cserenevek();
+            CollectionAssert.AreEqual(vart, e);
+        }
+        [Test]
+        [TestCase("47000 PártA 23500 PártA 16000 PártB 15900 PártC 15667 PártA 12000 PártD 11750 PártA 9400 PártA 8000 PártB 6000 PártE")]
+        public void Cserelget(string sor)
+        {
+            Szamol sz = new Szamol("inp0.txt");
+            List<(int, string)> vart = new List<(int, string)>();
+            string[] sorSplit = sor.Split(' ');
+            for (int i = 0; i < sorSplit.Length - 1; i++)
+            {
+                vart.Add((int.Parse(sorSplit[i]), sorSplit[i + 1]));
+            }
+            List<(int, string)> eredmeny = sz.Cserelget();
+            CollectionAssert.AreEqual(sor, string.Join(" ", vart.Select(x => $"{x.Item1} {x.Item2}")));
+        }
+        //Tesztek vege
+        //--------------------------------------------------------------------------------------------------------------------------------------
