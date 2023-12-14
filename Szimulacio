@@ -13,10 +13,31 @@ namespace Dhondt
         {
 
         }
+        public int PartSzamGeneral()
+        {
+            int partsz = r.Next(15, 100);
+            return partsz;
+        }
+        public int MandatumGeneral()
+        {
+            
+            int mandatumsz = 0;
+            if (PartSzamGeneral() > 50)
+            {
+                mandatumsz = PartSzamGeneral()*3;
+            }
+            else
+            {
+                mandatumsz = PartSzamGeneral() * 2;
+
+            }
+            return mandatumsz;
+        }
         public void Lefuttat()
         {
             int db = 2;
-            General(db, r.Next(15, 100), r.Next(15, 93));
+            
+            General2MasodikResz(db, PartSzamGeneral(), MandatumGeneral());
             for (int i = 0; i < db + 1; i++)
             {
                 Szamol sz = new Szamol($"inp{i}.txt");
@@ -31,8 +52,16 @@ namespace Dhondt
         }
 
 
-
-        public void General(int db, int partSzam, int mandatumSzam)
+        public bool NagySzavazatuMegtol()
+        {
+            int szam = r.Next(1, 6);
+            return (szam < 5) ? false : true;
+        }
+        public bool Genera2ElsoResz() {
+            int szam = r.Next(1,16);
+            return (szam < 15) ? false : true;
+        }
+        public void General2MasodikResz(int db, int partSzam, int mandatumSzam)
         {
             int n = 1;
             while (n <= db)
@@ -42,14 +71,49 @@ namespace Dhondt
 
                     List<int> szazalekok = new List<int>() { 5, 10, 15 };
                     w.WriteLine(mandatumSzam);
+                    
                     for (int i = 1; i <= partSzam; i++)
                     {
-                        w.WriteLine($"Párt{i} {r.Next(0, 2)} {r.Next(1000, 100000)} {szazalekok[r.Next(0, 3)]}");
+                        if (Genera2ElsoResz())
+                        {
+                            if (NagySzavazatuMegtol())
+                            {
+                                w.WriteLine($"Párt{i} {r.Next(0, 2)} {r.Next(410000, 450000)} {szazalekok[r.Next(1, 3)]}");
+                            }
+                            else
+                            {
+                                w.WriteLine($"Párt{i} {r.Next(0, 2)} {r.Next(225000, 330000)} {szazalekok[r.Next(1, 3)]}");
+
+                            }
+                        }
+                        else
+                        {
+                            w.WriteLine($"Párt{i} {r.Next(0, 2)} {r.Next(0, 135000)} {szazalekok[r.Next(0, 2)]}");
+                        }
+                        //w.WriteLine($"Párt{i} {r.Next(0, 2)} {r.Next(1000, 100000)} {szazalekok[r.Next(0, 3)]}");
                     }
                 }
                 n++;
             }
         }
+        //public void General(int db, int partSzam, int mandatumSzam)
+        //{
+        //    int n = 1;
+        //    while (n <= db)
+        //    {
+        //        using (StreamWriter w = new StreamWriter($"inp{n}.txt"))
+        //        {
+
+        //            List<int> szazalekok = new List<int>() { 5, 10, 15 };
+        //            w.WriteLine(mandatumSzam);
+        //            for (int i = 1; i <= partSzam; i++)
+        //            {
+        //                w.WriteLine($"Párt{i} {r.Next(0, 2)} {r.Next(1000, 100000)} {szazalekok[r.Next(0, 3)]}");
+        //            }
+        //        }
+        //        n++;
+        //    }
+        //}
 
         public void ElsoTablaKiir(Partok p)
         {
@@ -69,7 +133,7 @@ namespace Dhondt
                     w.WriteLine($"{x.PartNev} - {x.SzavazatSzam}");
                 });
             }
-           Console.WriteLine();
+            Console.WriteLine();
         }
 
         public void MasodikTabla(Partok p)
@@ -149,7 +213,7 @@ namespace Dhondt
 
         public void NegyedikTabla(List<(int, string)> l)
         {
-            
+
         }
     }
 }
