@@ -1,7 +1,10 @@
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.IO;
 using System.Linq;
+using NUnit.Framework;
+using NUnit.Framework.Legacy;
 
 namespace Dhondt
 {
@@ -31,7 +34,7 @@ namespace Dhondt
             int mandatumsz = 0;
             if (PartSzamGeneral() > 50)
             {
-                mandatumsz = PartSzamGeneral()*3;
+                mandatumsz = PartSzamGeneral() * 3;
             }
             else
             {
@@ -52,11 +55,79 @@ namespace Dhondt
                 sz.Atfordit();
                 List<(int, string)> k = sz.Cserelget();
                 ElsoTablaKiir(sz.p);
+                Console.WriteLine();
                 MasodikTabla(sz.p);
+                Console.WriteLine();
                 HarmadikTablaKiir(k);
-                NegyedikTabla(k);
+                Console.WriteLine();
+                NegyedikTabla(sz.p);
+                Console.WriteLine();
+                //OtodikTablaKiir(sz.p);
+                Console.WriteLine();
+                HatodikTablaKiir(k);
+                Console.WriteLine();
+
             }
         }
+        //----------------------------------------------------------------------------------------------------------------------------------------------
+        //Tesztek kezdete
+        //itt stringé kell csinálni az l-t meg az eredmenyt is
+        [Test]
+        [TestCase("PártA PártB PártC PártD PártE")]
+        public void KuszobTeszt(string vart)
+        {
+            List<string> l = vart.Split(' ').ToList();
+            Szamol tSz = new Szamol("inp0.txt");
+            List<string> tSzEredmeny = tSz.KuszobSzamit();
+            CollectionAssert.AreEqual(l, tSzEredmeny);
+        }
+
+        [Test]
+        [TestCase("PártA PártB PártC PártE")]
+        public void KedvezmenyesekTeszt(string vart)
+        {
+            List<string> l = vart.Split(' ').ToList();
+            Szamol tSz = new Szamol("inp0.txt");
+            List<string> tSzEredmeny = tSz.Kedvezmenyesek();
+            CollectionAssert.AreEqual(l, tSzEredmeny);
+        }
+        [Test]
+        [TestCase("47000 PártA 23500 PártA 16000 PártB 15900 PártC 15667 PártA 12000 PártD 11750 PártA 9400 PártA 8000 PártB 7950 PártC")]
+        public void MandatumKiosztTeszt(string sor)
+        {
+            Szamol sz = new Szamol("inp0.txt");
+            List<(int, string)> eredmeny = sz.MandatumKioszt();
+            string formattedEredmeny = string.Join(" ", eredmeny.Select(x => $"{x.Item1} {x.Item2}"));
+            Assert.That(formattedEredmeny, Is.EqualTo(sor));
+        }
+        [Test]
+        [TestCase("PártA PártB PártC PártE")]
+        public void UjKedvezemenyezett(string sor)
+        {
+            Szamol sz = new Szamol("inp0.txt");
+            List<string> vart = sor.Split(' ').ToList();
+            List<string> e = sz.UjKedvezemenyezett();
+            CollectionAssert.AreEqual(vart, e);
+        }
+        [Test]
+        [TestCase("PártE")]
+        public void CserenevekTeszt(string sor)
+        {
+            Szamol sz = new Szamol("inp0.txt");
+            List<string> vart = sor.Split(' ').ToList();
+            List<string> e = sz.Cserenevek();
+            CollectionAssert.AreEqual(vart, e);
+        }
+        [Test]
+        [TestCase("47000 PártA 23500 PártA 16000 PártB 15900 PártC 15667 PártA 12000 PártD 11750 PártA 9400 PártA 8000 PártB 6000 PártE")]
+        public void Cserelget(string sor)
+        {
+            Szamol sz = new Szamol("inp0.txt");
+            List<(int, string)> eredmeny = sz.Cserelget();
+            CollectionAssert.AreEqual(sor, string.Join(" ", eredmeny.Select(x => $"{x.Item1} {x.Item2}")));
+        }
+        //Tesztek vege
+        //--------------------------------------------------------------------------------------------------------------------------------------
         /// <summary>
         /// Azokból a szavazatszámokból amelyek sok szavazatot kapnak 1/5 eséllyel megtolja a szavazatjainak a számát.
         /// </summary>
@@ -70,8 +141,9 @@ namespace Dhondt
         /// Eldönti, hogy nagyobb szavazat szám legyen vagy kisebb
         /// </summary>
         /// <returns>visszatér egy igaz hamis értékkel</returns>
-        private bool GeneralElsoResz() {
-            int szam = r.Next(1,16);
+        private bool GeneralElsoResz()
+        {
+            int szam = r.Next(1, 16);
             return (szam < 15) ? false : true;
         }
         /// <summary>
@@ -81,7 +153,7 @@ namespace Dhondt
         /// <param name="n">indexelés</param>
         /// <param name="partSzam">Pártszám</param>
         /// <param name="mandatumSzam">MandátumSzám</param>
-        public void SorbaIr(int n,int partSzam,int mandatumSzam)
+        public void SorbaIr(int n, int partSzam, int mandatumSzam)
         {
             using (StreamWriter w = new StreamWriter($"inp{n}.txt"))
             {
@@ -136,7 +208,7 @@ namespace Dhondt
                 string szavazatSzamText = x.SzavazatSzam.ToString().PadRight(maxPartNevLength);
                 Console.WriteLine($"{paddedPartNev} - {szavazatSzamText}");
             });
-            using (StreamWriter w = new StreamWriter($"{counter}valasztasiEredmeny"))
+            using (StreamWriter w = new StreamWriter($"inp{counter}valasztasieredmeny.txt"))
             {
                 w.WriteLine($"{counter} választási eredmény");
                 p.Parts.ForEach(x =>
@@ -152,7 +224,7 @@ namespace Dhondt
         /// <param name="p">Partok típusú változó</param>
         public void MasodikTabla(Partok p)
         {
-            using (StreamWriter w = new StreamWriter($"{counter}választás.txt"))
+            using (StreamWriter w = new StreamWriter($"inp{counter}dhondtmatrix.txt"))
             {
                 Console.WriteLine($"{counter} - D'Hondt mátrix számítása");
                 w.WriteLine($"{counter}választás");
@@ -215,7 +287,7 @@ namespace Dhondt
             {
                 Console.WriteLine(entry);
             }
-            using (StreamWriter w = new StreamWriter($"{counter}valasztasvegeredmenye"))
+            using (StreamWriter w = new StreamWriter($"inp{counter}kapottmandatumokszama.txt"))
             {
                 w.WriteLine($"{counter}. választás végeredménye");
                 foreach (string entry in result)
@@ -225,12 +297,48 @@ namespace Dhondt
 
             }
             Console.WriteLine();
+        }
+
+        public void NegyedikTabla(Partok p)
+        {
+            int ossz = p.Parts.Sum(x => x.SzavazatSzam);
+            p.Parts.ForEach(x => {
+                Console.WriteLine(Math.Round((double)x.SzavazatSzam / ossz * 100, 1) + "%");
+            });
+            using (StreamWriter w = new StreamWriter($"inp{counter}szavazatokaranya.txt"))
+            {
+                w.WriteLine("Statisztika1");
+                p.Parts.ForEach(x => {
+                    w.WriteLine(Math.Round((double)x.SzavazatSzam / ossz * 100, 1) + "%");
+                });
+            }
+        }
+        public void OtodikTablaKiir()
+        { 
+        
+        }
+        private void HatodikTablaKiir(List<(int, string)> k)
+        {
+            Dictionary<string, int> PartEsMandatumSzam = MandatumCount(k);
+            foreach (var item in PartEsMandatumSzam)
+            {
+                Console.WriteLine(Math.Round((double)item.Value / Partok.Mandatum*100, 1) + "%");
+            }
+            using (StreamWriter w = new StreamWriter($"inp{counter}mandatumokaranya.txt"))
+            {
+                foreach (var item in PartEsMandatumSzam)
+                {
+                    w.WriteLine(Math.Round((double)item.Value / Partok.Mandatum * 100, 1) + "%");
+                }
+            }
             counter++;
         }
-
-        public void NegyedikTabla(List<(int, string)> l)
-        {
-
-        }
+        /// <summary>
+        /// Megcsinál egy dictionary-t ahol a kulcs a pártnév és a hozzá rendelt érték pedig a mandátumainak száma
+        /// </summary>
+        /// <param name="k"> Egy lista amiben egy adott párt a mandátumjainak számaszor szerepel a hozzá rendelt szavazatával.</param>
+        /// <returns>Egy dictionary amiben megvannak a pártok és azok mandátumainak száma</returns>
+        private Dictionary<string, int> MandatumCount(List<(int, string)> k) => k.GroupBy(item => item.Item2).ToDictionary(group => group.Key, group => group.Count());
+        
     }
 }
