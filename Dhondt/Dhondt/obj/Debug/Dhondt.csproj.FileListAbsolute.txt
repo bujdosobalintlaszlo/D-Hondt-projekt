@@ -1,8 +1,0 @@
-C:\Users\User\Desktop\Dhondt\Dhondt\bin\Debug\Dhondt.exe.config
-C:\Users\User\Desktop\Dhondt\Dhondt\bin\Debug\Dhondt.exe
-C:\Users\User\Desktop\Dhondt\Dhondt\bin\Debug\Dhondt.pdb
-C:\Users\User\Desktop\Dhondt\Dhondt\obj\Debug\Dhondt.csproj.AssemblyReference.cache
-C:\Users\User\Desktop\Dhondt\Dhondt\obj\Debug\Dhondt.csproj.SuggestedBindingRedirects.cache
-C:\Users\User\Desktop\Dhondt\Dhondt\obj\Debug\Dhondt.csproj.CoreCompileInputs.cache
-C:\Users\User\Desktop\Dhondt\Dhondt\obj\Debug\Dhondt.exe
-C:\Users\User\Desktop\Dhondt\Dhondt\obj\Debug\Dhondt.pdb
