@@ -62,72 +62,12 @@ namespace Dhondt
                 Console.WriteLine();
                 NegyedikTabla(sz.p);
                 Console.WriteLine();
-                //OtodikTablaKiir(sz.p);
+                OtodikTablaKiir(k);
                 Console.WriteLine();
-                HatodikTablaKiir(k);
+                HatodikTablaKiir(k,sz.p);
                 Console.WriteLine();
-
             }
         }
-        //----------------------------------------------------------------------------------------------------------------------------------------------
-        //Tesztek kezdete
-        //itt stringé kell csinálni az l-t meg az eredmenyt is
-        [Test]
-        [TestCase("PártA PártB PártC PártD PártE")]
-        public void KuszobTeszt(string vart)
-        {
-            List<string> l = vart.Split(' ').ToList();
-            Szamol tSz = new Szamol("inp0.txt");
-            List<string> tSzEredmeny = tSz.KuszobSzamit();
-            CollectionAssert.AreEqual(l, tSzEredmeny);
-        }
-
-        [Test]
-        [TestCase("PártA PártB PártC PártE")]
-        public void KedvezmenyesekTeszt(string vart)
-        {
-            List<string> l = vart.Split(' ').ToList();
-            Szamol tSz = new Szamol("inp0.txt");
-            List<string> tSzEredmeny = tSz.Kedvezmenyesek();
-            CollectionAssert.AreEqual(l, tSzEredmeny);
-        }
-        [Test]
-        [TestCase("47000 PártA 23500 PártA 16000 PártB 15900 PártC 15667 PártA 12000 PártD 11750 PártA 9400 PártA 8000 PártB 7950 PártC")]
-        public void MandatumKiosztTeszt(string sor)
-        {
-            Szamol sz = new Szamol("inp0.txt");
-            List<(int, string)> eredmeny = sz.MandatumKioszt();
-            string formattedEredmeny = string.Join(" ", eredmeny.Select(x => $"{x.Item1} {x.Item2}"));
-            Assert.That(formattedEredmeny, Is.EqualTo(sor));
-        }
-        [Test]
-        [TestCase("PártA PártB PártC PártE")]
-        public void UjKedvezemenyezett(string sor)
-        {
-            Szamol sz = new Szamol("inp0.txt");
-            List<string> vart = sor.Split(' ').ToList();
-            List<string> e = sz.UjKedvezemenyezett();
-            CollectionAssert.AreEqual(vart, e);
-        }
-        [Test]
-        [TestCase("PártE")]
-        public void CserenevekTeszt(string sor)
-        {
-            Szamol sz = new Szamol("inp0.txt");
-            List<string> vart = sor.Split(' ').ToList();
-            List<string> e = sz.Cserenevek();
-            CollectionAssert.AreEqual(vart, e);
-        }
-        [Test]
-        [TestCase("47000 PártA 23500 PártA 16000 PártB 15900 PártC 15667 PártA 12000 PártD 11750 PártA 9400 PártA 8000 PártB 6000 PártE")]
-        public void Cserelget(string sor)
-        {
-            Szamol sz = new Szamol("inp0.txt");
-            List<(int, string)> eredmeny = sz.Cserelget();
-            CollectionAssert.AreEqual(sor, string.Join(" ", eredmeny.Select(x => $"{x.Item1} {x.Item2}")));
-        }
-        //Tesztek vege
-        //--------------------------------------------------------------------------------------------------------------------------------------
         /// <summary>
         /// Azokból a szavazatszámokból amelyek sok szavazatot kapnak 1/5 eséllyel megtolja a szavazatjainak a számát.
         /// </summary>
@@ -280,6 +220,7 @@ namespace Dhondt
                     stringCounts[currentString] = 1;
                 }
             }
+            //kerdeses h kiszervezzuk-e
             List<string> result = stringCounts.Select(pair => $"{pair.Key}: {pair.Value}").ToList();
             result.Sort();
             stringCounts.OrderBy(x => x.Value);
@@ -313,16 +254,23 @@ namespace Dhondt
                 });
             }
         }
-        public void OtodikTablaKiir()
-        { 
-        
+        public void OtodikTablaKiir(List<(int, string)> k,Partok p)
+        {
+            List<string> partok = k.Select(x => x.Item2).Distinct().ToList();
+            List<(string, int)> partEsSzavszam = new List<(string, int)>();
+            partok.ForEach(x =>
+            {
+                int szam =Convert.ToInt32(p.Parts.Where(y => y.PartNev == x).Select(z => z.oszlop[0].Item1).Distinct());
+                partEsSzavszam.Add((x,szam));
+            });
+            //Sumolni az int részt és mindegyiket leosztani vel.
         }
         private void HatodikTablaKiir(List<(int, string)> k)
         {
             Dictionary<string, int> PartEsMandatumSzam = MandatumCount(k);
             foreach (var item in PartEsMandatumSzam)
             {
-                Console.WriteLine(Math.Round((double)item.Value / Partok.Mandatum*100, 1) + "%");
+                Console.WriteLine(Math.Round((double)item.Value / Partok.Mandatum * 100, 1) + "%");
             }
             using (StreamWriter w = new StreamWriter($"inp{counter}mandatumokaranya.txt"))
             {
@@ -339,6 +287,85 @@ namespace Dhondt
         /// <param name="k"> Egy lista amiben egy adott párt a mandátumjainak számaszor szerepel a hozzá rendelt szavazatával.</param>
         /// <returns>Egy dictionary amiben megvannak a pártok és azok mandátumainak száma</returns>
         private Dictionary<string, int> MandatumCount(List<(int, string)> k) => k.GroupBy(item => item.Item2).ToDictionary(group => group.Key, group => group.Count());
-        
+
+
+        private static readonly List<(int, string)> partok = new List<(int, string)>() {
+                          (47000,"PártA"),
+                          (16000,"PártB")
+                      };
+        //----------------------------------------------------------------------------------------------------------------------------------------------
+        //Tesztek kezdete
+        //itt stringé kell csinálni az l-t meg az eredmenyt is
+
+        [Test]
+        [TestCase("PártA PártB PártC PártD PártE")]
+        public void KuszobTeszt(string vart)
+        {
+            List<string> l = vart.Split(' ').ToList();
+            Szamol tSz = new Szamol("inp0.txt");
+            List<string> tSzEredmeny = tSz.KuszobSzamit();
+            CollectionAssert.AreEqual(l, tSzEredmeny);
+        }
+
+        [Test]
+        [TestCase("PártA PártB PártC PártE PártF")]
+        public void KedvezmenyesekTeszt(string vart)
+        {
+            List<string> l = vart.Split(' ').ToList();
+            Szamol tSz = new Szamol("inp0.txt");
+            List<string> tSzEredmeny = tSz.Kedvezmenyesek();
+            CollectionAssert.AreEqual(l, tSzEredmeny);
+        }
+
+        [Test]
+        [TestCase("47000 PártA 23500 PártA 16000 PártB 15900 PártC 15667 PártA 12000 PártD 11750 PártA 9400 PártA 8000 PártB 7950 PártC")]
+        public void MandatumKiosztTeszt(string sor)
+        {
+            Szamol sz = new Szamol("inp0.txt");
+            List<(int, string)> eredmeny = sz.MandatumKioszt();
+            string formattedEredmeny = string.Join(" ", eredmeny.Select(x => $"{x.Item1} {x.Item2}"));
+            Assert.That(formattedEredmeny, Is.EqualTo(sor));
+        }
+
+        [Test]
+        [TestCase("PártA PártB PártC PártE")]
+        public void UjKedvezemenyezett(string sor)
+        {
+            Szamol sz = new Szamol("inp0.txt");
+            List<string> vart = sor.Split(' ').ToList();
+            List<string> e = sz.UjKedvezemenyezett();
+            CollectionAssert.AreEqual(vart, e);
+        }
+
+        [Test]
+        [TestCase("PártE")]
+        public void CserenevekTeszt(string sor)
+        {
+            Szamol sz = new Szamol("inp0.txt");
+            List<string> vart = sor.Split(' ').ToList();
+            List<string> e = sz.Cserenevek();
+            CollectionAssert.AreEqual(vart, e);
+        }
+
+        [Test]
+        [TestCase("47000 PártA 23500 PártA 16000 PártB 15900 PártC 15667 PártA 12000 PártD 11750 PártA 9400 PártA 8000 PártB 6000 PártE")]
+        public void Cserelget(string sor)
+        {
+            Szamol sz = new Szamol("inp0.txt");
+            List<(int, string)> eredmeny = sz.Cserelget();
+            CollectionAssert.AreEqual(sor, string.Join(" ", eredmeny.Select(x => $"{x.Item1} {x.Item2}")));
+        }
+
+        [Test]
+        [TestCase("PártA 1 PártB 1")]
+        public void MandatumCountTeszt(string vart)
+        {
+
+            Dictionary<string, int> eredmenyDic = MandatumCount(partok);
+            string eredmeny = string.Join(" ", eredmenyDic.Select(x => $"{x.Key} {x.Value}"));
+            Assert.That(eredmeny, Is.EqualTo(vart));
+        }
+        //Tesztek vege
+        //--------------------------------------------------------------------------------------------------------------------------------------
     }
 }
