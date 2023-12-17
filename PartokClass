@@ -6,11 +6,14 @@ using System.Linq;
 namespace Dhondt
 {
     /// <summary>
-    /// A pártokat és kapcsolódó adatokat tároló osztály.
+    /// Ebből az osztályból érhető el az a lista amely az összes pártot magábafoglalja.
+    /// Emellett elérhető a pártszám(Partszam) és a mandátumszám(Mandatum) is.
     /// </summary>
     class Partok
     {
+        //Az összes párt egy listában
         public List<Part> Parts { get; set; }
+        //pártszám gettere
         public int Partszam
         {
             get
@@ -19,6 +22,7 @@ namespace Dhondt
             }
         }
         private static int mandatum;
+        //mandátum gettere
         public static int Mandatum
         {
             get
@@ -27,10 +31,10 @@ namespace Dhondt
             }
         }
 
+        //konstruktor
         public Partok()
         {
             Parts = new List<Part>();
-
         }
 
         /// <summary>
