@@ -1,7 +1,9 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Net.Mail;
+using NUnit.Framework;
+using NUnit.Framework.Legacy;
+
 
 namespace Dhondt
 {
@@ -11,6 +13,8 @@ namespace Dhondt
     /// </summary>
     class Szamol
     {
+
+        //Partok példányosítása. Ezt használja az összes függvény ebben az osztályban.
         public Partok p { get; }
 
         /// <summary>
@@ -25,11 +29,16 @@ namespace Dhondt
         /// Számítja és visszaadja azoknak a pártoknak a listáját, amelyek átlépnek a százalékos küszöb értékükön.(minden pártnak az utolsó adattagja a százalék értéke)
         /// </summary>
         /// <returns>A megadott küszöbértéket meghaladó pártok listája.</returns>
-        public List<string> KuszobSzamit()
-        {
-            double sum = p.Parts.Sum(part => part.SzavazatSzam);
-            return p.Parts.Where(part => Math.Round((double)part.SzavazatSzam / sum * 100) >= part.Szazalek).Select(part => part.PartNev).ToList();
-        }
+        public List<string> KuszobSzamit() => p.Parts.Where(part => Math.Round((double)part.SzavazatSzam / (double)SzavazatokOsszege() * 100) >= part.Szazalek).Select(part => part.PartNev).ToList();
+        
+
+        /// <summary>
+        /// Osszegzi a Pártok szavazatszámát.
+        /// </summary>
+        /// <returns>Pártok szavazatszámának összege.</returns>
+        private int SzavazatokOsszege() => p.Parts.Sum(part => part.SzavazatSzam);
+        
+
         /// <summary>
         /// Visszaadja azon pártok neveit, amelyek kedvezményben részesülnek.(tehát a nemzetiség mezőn 1-es szám található)
         /// </summary>
@@ -46,66 +55,94 @@ namespace Dhondt
         /// Összefésüli azokat a pártokat melyek kedvezményezettek (nemzetiségiek) és a küszöböt is átlépték.
         /// </summary>
         /// <returns>String típusú lista mely a fenti tulajdonságú Pártnevekkel tér vissza.</returns>
-        public List<string> UjKedvezemenyezett()
-        {
-            List<string> kuszob = KuszobSzamit();
-            List<string> kedvezmenyesek = Kedvezmenyesek();
-            return kedvezmenyesek.Where(kedv => kuszob.Contains(kedv)).ToList();
-        }
+        public List<string> UjKedvezemenyezett() => Kedvezmenyesek().Where(kedv => KuszobSzamit().Contains(kedv)).ToList();
+        
 
         /// <summary>
         /// Kiválasztja azokat a pártokat, amelyek kedvezményezettek de nincsenek jelen a mandátumosok között.
         /// </summary>
         /// <returns>Azoknak a pártoknak a listája, amelyek kedvezményezettek de nincsenek jelen a mandátumosok között.</returns>
-        public List<string> Cserenevek()
-        {
-            List<string> kedvezmenyesek = UjKedvezemenyezett();
-            List<(int, string)> mandatumosok = MandatumKioszt();
-            return kedvezmenyesek.Where(kedv => !mandatumosok.Any(mand => mand.Item2 == kedv)).Distinct().ToList();
-        }
-
+        public List<string> CsereNevek() => UjKedvezemenyezett().Where(kedv => !MandatumKioszt().Any(mand => mand.Item2 == kedv)).Distinct().ToList();
+        
         /// <summary>
-        /// Ellenőrzi, hogy van-e kiváltságos párt ami nem kapott mandátumot és ennek megfelelően kicserélgeti őket.
+        /// Mindegyik párt max szavazatát keresi.
         /// </summary>
-        /// <returns>(Szavazatszám mellyel mandátumot ért el,pártnév)</returns>
-        public List<(int, string)> Cserelget()
+        /// <param name="csere">Kedvezményesek nevei.</param>
+        /// <returns>Adott párt neve és max szavazata(1db azaz az eredeti)</returns>
+        private IEnumerable<(int, string)> MaxErtekKiolvas(List<string> csere)
         {
-            List<string> csere = Cserenevek();
-            List<(int, string)> mandatumosok = MandatumKioszt().Take(Partok.Mandatum - csere.Count).ToList();
-            var maxValues = csere.Select(kp =>
+            return csere.Select(kp =>
             {
                 int max = p.Parts.Find(x => x.PartNev == kp).oszlop.Select(x => x.Item1).Max();
                 return (max, kp);
             });
-            mandatumosok.AddRange(maxValues);
+        }
+
+        /// <summary>
+        /// Megnézi,hogy van-e kedvezményes aki nem kapott mandátumot. H van kicseréli az utolsóval, vagy a legkisebb szavazatszámúval.
+        /// </summary>
+        /// <returns></returns>
+        public List<(int, string)> Cserelget()
+        {
+            List<string> csere = CsereNevek();
+            List<(int, string)> mandatumosok = MandatumKioszt().Take(Partok.Mandatum - csere.Count).ToList();
+            var maxErtek = MaxErtekKiolvas(csere);
+            mandatumosok.AddRange(maxErtek);
             return mandatumosok;
         }
+
+        /// <summary>
+        /// Megtalálja a pártot név szerint.
+        /// </summary>
+        private Part Megkeres(string partNev) => p.Parts.FirstOrDefault(part => part.PartNev == partNev);
+
         /// <summary>
         /// Átforgatja truera az adott párt oszlopjában az Item2 ha mandátumot ért el vele.
         /// </summary>
         public void Atfordit()
         {
             List<(int, string)> mandList = Cserelget();
-
             foreach (var mand in mandList)
             {
-                string partName = mand.Item2;
-                int numberToFind = mand.Item1;
+                string partNev = mand.Item2;
+                int keresettSzam = mand.Item1;
 
-                Part foundPart = p.Parts.FirstOrDefault(part => part.PartNev == partName);
+                Part keresettPart = Megkeres(partNev);
+                var hely = (keresettPart != null) ? keresettPart.oszlop.FirstOrDefault(item => item.Item1 == keresettSzam && !item.Item2) : default;
 
-                if (foundPart != null)
+                if (keresettPart != null && hely != default)
                 {
-                    for (int i = 0; i < foundPart.oszlop.Count; i++)
-                    {
-                        if (foundPart.oszlop[i].Item1 == numberToFind && foundPart.oszlop[i].Item2 == false)
-                        {
-                            foundPart.oszlop[i] = (numberToFind, true);
-                        }
-                    }
+                    int index = keresettPart.oszlop.IndexOf(hely);
+                    keresettPart.oszlop[index] = (keresettSzam, true);
                 }
             }
         }
 
+        //------------------------------------------------------------
+        //Tesztek kezdete
+
+        //
+        [Test]
+        public void SzavazatokOsszegeTEszt()
+        { 
+        
+        }
+
+        //
+        [Test]
+        public void MaxErtekKiolvasTeszt()
+        { 
+        
+        }
+
+        //
+        [Test]
+        public void MegkeresTeszt()
+        { 
+        
+        }
+
+        //Tesztek vége
+        //------------------------------------------------------------
     }
 }
