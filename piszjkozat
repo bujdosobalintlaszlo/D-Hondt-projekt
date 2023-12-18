@@ -1,7 +1,12 @@
-[Test]
-        [TestCase("")]
-        public void MaxErtekKiolvasTeszt()
+ [Test]
+        [TestCase("a")]
+        public void MaxErtekKiolvasTeszt(string vart)
         {
             List<string> csere = CsereNevek();
             IEnumerable<(int, string)> e = MaxErtekKiolvas(csere);
+
+            List<string> processedList = e.Select(tuple => $"{tuple.Item1} {tuple.Item2}").ToList();
+            string vege = string.Join(" ", processedList);
+
+            Assert.That(vart, Is.EqualTo(vege));
         }
