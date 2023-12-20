@@ -28,14 +28,14 @@ namespace Dhondt
         /// </summary>
         /// <returns>Visszatér a pártszámmal.</returns>
         private int PartSzamGeneral() => r.Next(15, 100);
-        
+
         /// <summary>
         /// Kigenerálja a mandátumok számát a pártszám figyelembe vételével.
         /// </summary>
         /// <returns>Visszatér a mandátumszámmal.</returns>
-        private int MandatumGeneral() => PartSzamGeneral()>50 ? PartSzamGeneral()*3 : PartSzamGeneral() * 2;
-            
-        
+        private int MandatumGeneral() => PartSzamGeneral() > 50 ? PartSzamGeneral() * 3 : PartSzamGeneral() * 2;
+
+
         /// <summary>
         /// Lefuttatja azokat a függvényeket amikre szükségünk van a Console-on való megjelenítéshez.
         /// </summary>
@@ -70,8 +70,8 @@ namespace Dhondt
         /// </summary>
         /// <returns>Visszatér egy igaz hamis értékkel.</returns>
         /// 
-        private bool NagySzavazatuMegtol() => r.Next(1, 6) < 5 ? false : true;
-        
+        private bool NagySzavazatuMegtol() => r.Next(1, 101) < 5 ? true : false;
+
         /// <summary>
         /// Eldönti, hogy nagyobb szavazat szám legyen vagy kisebb.
         /// </summary>
@@ -96,13 +96,13 @@ namespace Dhondt
                     bool nagySzavazatu = NagySzavazatuMegtol();
 
                     int randomNumber;
-                    if (elsoResz)
+                    if (nagySzavazatu)
                     {
-                        randomNumber = nagySzavazatu ? r.Next(410000, 450000) : r.Next(225000, 330000);
+                        randomNumber =r.Next(5000000, 10000000);
                     }
                     else
                     {
-                        randomNumber = r.Next(0, 135000);
+                        randomNumber = r.Next(0, 200000);
                     }
 
                     int index = elsoResz ? (nagySzavazatu ? r.Next(1, 3) : r.Next(1, 3)) : r.Next(0, 2);
@@ -216,25 +216,26 @@ namespace Dhondt
         /// <param name="l">Örökölt lista mely a Cserelget() függvény segítségével jön létre. Ezt a listát a Lefuttat metóduson belül hozzuk létre.Tartalma a szavazatszám és a hozzá tartozó párt.</param>
         private void HarmadikTablaKiir(List<(int, string)> l)
         {
+            
             //ide gyűjtjük ki a pártokat és hozzá a mandátumokat
             Dictionary<string, int> partEsMandatum = HarmadikTablaDictionary(l);
 
             //A dictionary adatai rendezve
             List<string> eredmeny = RendezettAdatok(partEsMandatum);
-            
+
             //Kiírás console-ra
             foreach (string entry in eredmeny)
             {
-                Console.WriteLine(entry);
+                Console.WriteLine(entry + "db");
             }
-            
+
             //File-ba írás
             using (StreamWriter w = new StreamWriter($"inp{counter}kapottmandatumokszama.txt"))
             {
                 w.WriteLine($"{counter}. választás végeredménye");
                 foreach (string entry in eredmeny)
                 {
-                    w.WriteLine(entry);
+                    w.WriteLine(entry + "db");
                 }
 
             }
@@ -272,7 +273,7 @@ namespace Dhondt
         /// </summary>
         /// <param name="dic">Dictionary. string = párt int = mandátumainak száma.</param>
         /// <returns>Lista. Egy eleme: párt mandátumok száma.</returns>
-        private List<string> RendezettAdatok(Dictionary<string,int> dic)
+        private List<string> RendezettAdatok(Dictionary<string, int> dic)
         {
             List<string> result = dic.Select(pair => $"{pair.Key}: {pair.Value}").ToList();
             result.Sort();
@@ -288,7 +289,7 @@ namespace Dhondt
             int ossz = SzavazatokSum(p);
 
             p.Parts.ForEach(x => {
-                Console.WriteLine(Math.Round((double)x.SzavazatSzam / ossz * 100, 1) + "%");
+                Console.WriteLine(x.PartNev+ ": "+ Math.Round((double)x.SzavazatSzam / ossz * 100, 1) + "%");
             });
 
             //File-ba írás.
@@ -296,7 +297,7 @@ namespace Dhondt
             {
                 w.WriteLine("Statisztika1");
                 p.Parts.ForEach(x => {
-                    w.WriteLine(Math.Round((double)x.SzavazatSzam / ossz * 100, 1) + "%");
+                    w.WriteLine(x.PartNev + ": " + Math.Round((double)x.SzavazatSzam / ossz * 100, 1) + "%");
                 });
             }
         }
@@ -318,17 +319,17 @@ namespace Dhondt
         {
             List<string> partok = EgyediPartok(k);
 
-            List<(string, int)> partEsSzavszam = PartEsSzavszamFeltolt(partok,p);
+            List<(string, int)> partEsSzavszam = PartEsSzavszamFeltolt(partok, p);
 
             int osszeg = BejutottakSzavazatSum(partEsSzavszam);
 
             //Console-ra írás
-            partEsSzavszam.ForEach(x =>{ Console.WriteLine(Math.Round((double)x.Item2 / osszeg * 100) + "%"); });
+            partEsSzavszam.ForEach(x => { Console.WriteLine(x.Item1 + ": " + Math.Round((double)x.Item2 / osszeg * 100) + "%"); });
 
             //File-ba írás.
             using (StreamWriter w = new StreamWriter($"inp{counter}SzavazatAranyMandatummal"))
             {
-                partEsSzavszam.ForEach(x => { w.WriteLine(Math.Round((double)x.Item2 / osszeg * 100) + "%"); });
+                partEsSzavszam.ForEach(x => { w.WriteLine(x.Item1 + ": " + Math.Round((double)x.Item2 / osszeg * 100) + "%"); });
             }
         }
 
@@ -349,10 +350,10 @@ namespace Dhondt
         /// <summary>
         /// 
         /// </summary>
-        /// <param name="l">Örökölt lista mely a Cserelget() függvény segítségével jön létre. Ezt a listát a Lefuttat metóduson belül hozzuk létre.Tartalma a szavazatszám és a hozzá tartozó párt.</param>
+        /// <param name="l">Egyedi mandátumot kapott elemek listája.</param>
         /// <param name="p">A pártok listáját tartalmazó osztály példánya.</param>
         /// <returns></returns>
-        private List<(string, int)> PartEsSzavszamFeltolt(List<string> l,Partok p)
+        private List<(string, int)> PartEsSzavszamFeltolt(List<string> l, Partok p)
         {
             List<(string, int)> partEsSzavszam = new List<(string, int)>();
             l.ForEach(x =>
@@ -378,7 +379,7 @@ namespace Dhondt
             Dictionary<string, int> PartEsMandatumSzam = MandatumCount(k);
             foreach (var item in PartEsMandatumSzam)
             {
-                Console.WriteLine(Math.Round((double)item.Value / Partok.Mandatum * 100, 1) + "%");
+                Console.WriteLine(item.Key + ": " + Math.Round((double)item.Value / Partok.Mandatum * 100, 1) + "%");
             }
 
             //File-ba írás.
@@ -386,7 +387,7 @@ namespace Dhondt
             {
                 foreach (var item in PartEsMandatumSzam)
                 {
-                    w.WriteLine(Math.Round((double)item.Value / Partok.Mandatum * 100, 1) + "%");
+                    w.WriteLine(item.Key + ": " + Math.Round((double)item.Value / Partok.Mandatum * 100, 1) + "%");
                 }
             }
 
@@ -405,7 +406,7 @@ namespace Dhondt
         //----------------------------------------------------------------------------------------------------------------------------------------------
         //Tesztek kezdete
         //itt stringé kell csinálni az l-t meg az eredmenyt is
-        private static readonly List<(int, string)> partok = new List<(int, string)>() { (47000,"PártA"),(16000,"PártB") };
+        private static readonly List<(int, string)> partok = new List<(int, string)>() { (47000, "PártA"), (16000, "PártB") };
 
         //KuszobSzamit() függvény tesztje. Ez a függvény a Szamol class-ban található.
         [Test]
@@ -484,46 +485,90 @@ namespace Dhondt
         }
 
         //PartEsSzavszamFeltolt() függvény tesztje. Ez a függvény a Szimulacio class-ban található.
+        private static readonly List<string> partEsSzavList = new List<string>() {"PártA","PártB","PártC","PártD","PártE" };
         [Test]
-        public void PartEsSzavszamFeltoltTeszt()
-        { 
-        
+        [TestCase("PártA 47000 PártB 16000 PártC 15900 PártD 12000 PártE 6000")]
+        public void PartEsSzavszamFeltoltTeszt(string vart)
+        {
+            Partok pt = new Partok("inp0.txt");
+            List<(string, int)> e = PartEsSzavszamFeltolt(partEsSzavList, pt);
+            List<string> eEgybe = e.Select(t => $"{t.Item1} {t.Item2}").ToList();
+            string eString = string.Join(" ", eEgybe);
+            Assert.That(eString, Is.EqualTo(vart));
         }
+
 
         //HarmadikTablaDictionary() függvény tesztje. Ez a függvény a Szimulacio class-ban található.
         [Test]
-        public void HarmadikTablaDictionaryTeszt()
-        { 
-        
+        [MaxTime(1000)]
+        [TestCase("PártA 5 PártB 2 PártC 1 PártD 1 PártE 1")]
+        public void HarmadikTablaDictionaryTeszt(string vart)
+        {
+            Szamol sz = new Szamol("inp0.txt");
+            List<(int, string)> k = sz.Cserelget();
+            Dictionary<string, int> dic = HarmadikTablaDictionary(k);
+            List<string> dicSplit = dic.Select(x => $"{x.Key} {x.Value}").ToList();
+            string eredmeny = string.Join(" ", dicSplit);
+            Assert.That(eredmeny, Is.EqualTo(vart));
         }
 
 
-        //RendszerAdatokTeszt() függvény tesztje. Ez a függvény a Szimulacio class-ban található.
+        //RendezettAdatokAdatokTeszt() függvény tesztje. Ez a függvény a Szimulacio class-ban található.
+        private static readonly Dictionary<string, int> rednszerDic = new Dictionary<string, int>()
+        {
+            {"PártA", 5},
+            {"PártB", 2},
+            {"PártC", 1},
+            {"PártD", 1}, 
+            {"PártE", 1}
+        };
+
         [Test]
-        public void RendszerAdatokTeszt()
-        { 
-        
+        [Timeout(100)]
+        [TestCase("PártA 5 PártB 2 PártC 1 PártD 1 PártE 1")]
+        public void RendezettAdatokTeszt(string vart)
+        {
+            List<string> dicSplit = rednszerDic.Select(x => $"{x.Key} {x.Value}").ToList();
+            string eredmeny = string.Join(" ", dicSplit);
+            Assert.That(eredmeny, Is.EqualTo(vart));
         }
 
         //SzavazatSumTeszt() függvény tesztje. Ez a függvény a Szimulacio class-ban található.
         [Test]
-        public void SzavazatSumTeszt()
-        { 
-        
+        public void SzavazatokSumTeszt()
+        {
+            Partok p = new Partok("inp0.txt");
+            int eredmeny = SzavazatokSum(p);
+            Assert.That(100000, Is.EqualTo(eredmeny));
         }
+
+        private static readonly List<(string, int)> bejutottL = new List<(string, int)>()
+        {
+            ("PártA", 47000),
+            ("PártB", 16000),
+            ("PártC", 15900),
+            ("PártD", 12000),
+            ("PártE", 6000)
+        };
 
         //BejutottakSzavazatSumTeszt() függvény tesztje. Ez a függvény a Szimulacio class-ban található.
         [Test]
-        public void BejutottakSzavazatSumTeszt()
-        { 
-        
+        public void BejutottakSzavazatSumTeszt([Values(96900)] int vart)
+        {
+            int eredmeny = BejutottakSzavazatSum(bejutottL);
+            Assert.That(eredmeny, Is.EqualTo(vart));
         }
 
         //EgyedipartokTeszt() függvény tesztje. Ez a függvény a Szimulacio class-ban található.
         [Test]
-        public void EgyedipartokTeszt()
-        { 
-        
+        [TestCase("PártA PártB PártC PártD PártE")]
+        public void EgyedipartokTeszt(string vart)
+        {
+            Szamol sz = new Szamol("inp0.txt");
+            List<(int, string)> l = sz.Cserelget();
+            List<string> eList = EgyediPartok(l);
+            string eredmeny = string.Join(" ", eList);
+            Assert.That(eredmeny, Is.EqualTo(vart));
         }
         //Tesztek vege
         //--------------------------------------------------------------------------------------------------------------------------------------
